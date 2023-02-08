@@ -1,44 +1,56 @@
-import React, { useEffect } from "react";
-import { View, TouchableOpacity, Image, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, TouchableOpacity, Image, StyleSheet, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { FontAwesome } from "@expo/vector-icons";
 import colors from "../colors";
 import { Entypo } from "@expo/vector-icons";
-
-const catImageUrl =
-  "https://i.guim.co.uk/img/media/26392d05302e02f7bf4eb143bb84c8097d09144b/446_167_3683_2210/master/3683.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=49ed3252c0b2ffb49cf8b508892e452d";
+import { AntDesign } from "@expo/vector-icons";
+import { Button, Modal, TextInput } from "react-native-paper";
 
 const Home = () => {
   const navigation = useNavigation();
+  const [openModal, setOpenModal] = useState(true);
+  const [emailToChat, setEmailToChat] = useState("");
+
+  const hadleChangeEmailToChat = (event) => {
+    setEmailToChat(event);
+  };
+
+  const handleShowModal = () => setOpenModal(true);
+
+  const handleHide = () => setOpenModal(false);
 
   useEffect(() => {
     navigation.setOptions({
       title: "HOME",
       headerTitleAlign: "center",
       headerTintColor: colors.primary,
-      //   headerLeft: () => (
-      //     <FontAwesome
-      //       name="search"
-      //       size={24}
-      //       color={colors.gray}
-      //       style={{ marginLeft: 15 }}
-      //     />
-      //   ),
-      //   headerRight: () => (
-      //     <Image
-      //       source={{ uri: catImageUrl }}
-      //       style={{
-      //         width: 40,
-      //         height: 40,
-      //         marginRight: 15,
-      //       }}
-      //     />
-      //   ),
     });
   }, [navigation]);
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.item} onPress={handleShowModal}>
+        <AntDesign name="plus" size={24} color="white" />
+      </TouchableOpacity>
+      <Modal
+        visible={openModal}
+        onDismiss={handleHide}
+        contentContainerStyle={styles.modal}
+      >
+        <TextInput
+          style={styles.input}
+          label="Enter email to chat"
+          mode="outlined"
+          value={emailToChat}
+          onChangeText={hadleChangeEmailToChat}
+          autoFocus={false}
+          keyboardType="email-address"
+          textContentType="emailAddress"
+        />
+        <Button style={styles.button} onPress={handleShowModal}>
+          <Text style={{ color: "#fff" }}>Chat now!</Text>
+        </Button>
+      </Modal>
       <TouchableOpacity
         onPress={() => navigation.navigate("Chat")}
         style={styles.chatButton}
@@ -54,9 +66,22 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
     backgroundColor: "#fff",
+  },
+  modal: {
+    backgroundColor: "white",
+    padding: 20,
+    margin: 20,
+    borderRadius: 5,
+  },
+  input: { fontSize: 16, marginVertical: 10 },
+  button: {
+    marginTop: 10,
+    borderRadius: 5,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
   },
   chatButton: {
     backgroundColor: colors.primary,
@@ -74,5 +99,18 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     marginRight: 20,
     marginBottom: 50,
+    position: "absolute",
+    right: 5,
+    bottom: 5,
+  },
+  item: {
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 50,
+  },
+  itemText: {
+    color: "#fff",
+    fontSize: 18,
   },
 });

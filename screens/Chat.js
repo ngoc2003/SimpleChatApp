@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useCallback } from "react";
-import { TouchableOpacity, Text } from "react-native";
+import { TouchableOpacity, Text, Alert, StyleSheet } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 import {
   collection,
@@ -13,6 +13,7 @@ import { auth, database } from "../config/firebase";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import colors from "../colors";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);
@@ -85,6 +86,10 @@ export default function Chat() {
         backgroundColor: "#fff",
         borderRadius: 20,
       }}
+      placeholder="Your message . . ."
+      onPressAvatar={(user) =>
+        navigation.navigate("Profile", { emailUser: user._id })
+      }
       user={{
         _id: auth?.currentUser?.email,
         avatar:

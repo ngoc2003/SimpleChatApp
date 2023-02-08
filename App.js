@@ -9,6 +9,7 @@ import SignUp from "./screens/SignUp";
 import Home from "./screens/Home";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "./config/firebase";
+import Profile from "./screens/Profile";
 
 const Stack = createNativeStackNavigator();
 const AuthenticationUserContext = createContext({});
@@ -40,6 +41,7 @@ const ChatStack = () => {
     <Stack.Navigator defaultScreenOptions={Home}>
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="Chat" component={Chat} />
+      <Stack.Screen name="Profile" component={Profile} />
     </Stack.Navigator>
   );
 };

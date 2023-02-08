@@ -9,18 +9,24 @@ import {
   Alert,
 } from "react-native";
 import React, { useState } from "react";
+import { collection, addDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 const backgroundImage = require("../assets/backImage.png");
-import { auth } from "../config/firebase";
+import { auth, database } from "../config/firebase";
 
 const SignUp = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
 
   const handleSignUp = () => {
-    if (email && password) {
+    if (email && password && displayName) {
       createUserWithEmailAndPassword(auth, email, password)
         .then(() => {
+          addDoc(collection(database, "users"), {
+            email,
+            displayName,
+          });
           console.log("Sign Up success");
         })
         .catch((err) => Alert.alert(err.message));
@@ -34,11 +40,20 @@ const SignUp = ({ navigation }) => {
         <Text style={styles.title}>Sign up</Text>
         <TextInput
           style={styles.input}
+          placeholder="Enter display name"
+          autoCapitalize
+          textContentType="name"
+          autoFocus={false}
+          value={displayName}
+          onChangeText={(text) => setDisplayName(text)}
+        />
+        <TextInput
+          style={styles.input}
           placeholder="Enter email"
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"
-          autoFocus={true}
+          autoFocus={false}
           value={email}
           onChangeText={(text) => setEmail(text)}
         />
@@ -47,7 +62,7 @@ const SignUp = ({ navigation }) => {
           placeholder="Enter password"
           autoCapitalize="none"
           autoCorrect={false}
-          autoFocus={true}
+          autoFocus={false}
           value={password}
           textContentType="password"
           secureTextEntry={true}
