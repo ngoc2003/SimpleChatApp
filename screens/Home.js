@@ -1,14 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import { View, TouchableOpacity, Image, StyleSheet, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import colors from "../colors";
 import { Entypo } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { Button, Modal, TextInput } from "react-native-paper";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  query,
+  where,
+  onSnapshot,
+  getDocs,
+} from "firebase/firestore";
+import { auth, database } from "../config/firebase";
+import { chatsCollection, usersCollection } from "../config/collection";
+import ConversationList from "../components/conversationList";
 
 const Home = () => {
   const navigation = useNavigation();
-  const [openModal, setOpenModal] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
   const [emailToChat, setEmailToChat] = useState("");
 
   const hadleChangeEmailToChat = (event) => {
@@ -26,6 +44,57 @@ const Home = () => {
       headerTintColor: colors.primary,
     });
   }, [navigation]);
+
+  const handleAddNewChat = () => {
+    if (!emailToChat || emailToChat === auth.currentUser.email) {
+      console.log("Create error!");
+      return;
+    }
+    const q = query(usersCollection, where("email", "==", emailToChat));
+
+    onSnapshot(q, (snapshot) => {
+      if (snapshot.docs[0]) {
+        const targetId = snapshot.docs[0].data().id;
+        const isExist = query(
+          chatsCollection,
+          where("users", "in", [auth.currentUser.uid, targetId])
+        );
+        if (!isExist === false) {
+          addDoc(collection(database, "chats"), {
+            createdAt: serverTimestamp(),
+            users: [auth.currentUser.uid, targetId],
+          });
+        }
+        handleHide();
+        handleFetchList();
+      } else {
+        console.log("Create error!");
+      }
+    });
+  };
+
+  const [listConversation, setListConversation] = useState();
+
+  const handleFetchList = useCallback(() => {
+    const q = query(
+      chatsCollection,
+      // where("receiver.receiverId", "==", auth.currentUser.uid)
+      where("users", "array-contains", auth.currentUser.uid)
+    );
+    onSnapshot(q, (querySnapshot) => {
+      setListConversation(
+        querySnapshot.docs.map((doc) => ({
+          conversationId: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt.toDate(),
+        }))
+      );
+    });
+  }, []);
+
+  useEffect(() => {
+    handleFetchList();
+  }, [handleFetchList]);
 
   return (
     <View style={styles.container}>
@@ -47,7 +116,7 @@ const Home = () => {
           keyboardType="email-address"
           textContentType="emailAddress"
         />
-        <Button style={styles.button} onPress={handleShowModal}>
+        <Button style={styles.button} onPress={handleAddNewChat}>
           <Text style={{ color: "#fff" }}>Chat now!</Text>
         </Button>
       </Modal>
@@ -57,6 +126,7 @@ const Home = () => {
       >
         <Entypo name="chat" size={24} color={colors.lightGray} />
       </TouchableOpacity>
+      <ConversationList conversationList={listConversation} />
     </View>
   );
 };

@@ -4,6 +4,9 @@ import { GiftedChat } from "react-native-gifted-chat";
 import {
   collection,
   addDoc,
+  doc,
+  getDoc,
+  where,
   orderBy,
   query,
   onSnapshot,
@@ -14,8 +17,10 @@ import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import colors from "../colors";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { chatsCollection, messagesCollection } from "../config/collection";
 
-export default function Chat() {
+export default function Chat({ route }) {
+  const { conversationId } = route.params;
   const [messages, setMessages] = useState([]);
   const navigation = useNavigation();
 
@@ -44,13 +49,17 @@ export default function Chat() {
   }, [navigation]);
 
   useLayoutEffect(() => {
-    const collectionRef = collection(database, "chats");
-    const q = query(collectionRef, orderBy("createdAt", "desc"));
+    const q = query(
+      messagesCollection,
+      orderBy("createdAt", "desc"),
+      where("conversationId", "==", conversationId)
+    );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       setMessages(
         querySnapshot.docs.map((doc) => ({
           _id: doc.data()._id,
+          conversationId,
           createdAt: doc.data().createdAt.toDate(),
           text: doc.data().text,
           user: doc.data().user,
@@ -65,8 +74,9 @@ export default function Chat() {
       GiftedChat.append(previousMessages, messages)
     );
     const { _id, createdAt, text, user } = messages[0];
-    addDoc(collection(database, "chats"), {
+    addDoc(collection(database, "messages"), {
       _id,
+      conversationId,
       createdAt,
       text,
       user,

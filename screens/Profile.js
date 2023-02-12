@@ -16,7 +16,6 @@ const Profile = ({ route, navigation }) => {
     return unsubscribe;
   }, []);
 
-  console.log(user);
   return (
     <View>
       <Text>{emailUser}</Text>

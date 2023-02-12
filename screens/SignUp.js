@@ -22,8 +22,10 @@ const SignUp = ({ navigation }) => {
   const handleSignUp = () => {
     if (email && password && displayName) {
       createUserWithEmailAndPassword(auth, email, password)
-        .then(() => {
+        .then(({ user }) => {
           addDoc(collection(database, "users"), {
+            id: user.uid,
+            displayName,
             email,
             displayName,
           });
