@@ -13,6 +13,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 const backgroundImage = require("../assets/backImage.png");
 import { auth, database } from "../config/firebase";
+import colors from "../colors";
 
 const SignUp = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -79,7 +80,11 @@ const SignUp = ({ navigation }) => {
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
             <Text
-              style={{ color: "#f57c00", fontWeight: "semibold", fontSize: 14 }}
+              style={{
+                color: colors.primary,
+                fontWeight: "semibold",
+                fontSize: 14,
+              }}
             >
               {" "}
               Log in
@@ -132,7 +137,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
   },
   button: {
-    backgroundColor: "#f57c00",
+    backgroundColor: colors.primary,
     height: 58,
     borderRadius: 10,
     justifyContent: "center",

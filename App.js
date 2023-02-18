@@ -1,17 +1,28 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import "react-native-gesture-handler";
+import { createContext, useContext, useEffect, useState } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import { NavigationContainer } from "@react-navigation/native";
+
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItemList,
+  DrawerItem,
+} from "@react-navigation/drawer";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
 import Chat from "./screens/Chat";
 import Login from "./screens/Login";
 import SignUp from "./screens/SignUp";
 import Home from "./screens/Home";
-import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "./config/firebase";
+import { signOut } from "firebase/auth";
 import Profile from "./screens/Profile";
 
+const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
+
 const AuthenticationUserContext = createContext({});
 const AuthenticationProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -36,19 +47,34 @@ const AuthStack = () => {
   );
 };
 
+function CustomDrawerContent(props) {
+  const handleSignOut = () => {
+    signOut(auth).catch((error) => console.log("Error logging out: ", error));
+  };
+  return (
+    <DrawerContentScrollView {...props}>
+      <DrawerItemList {...props} />
+      <DrawerItem label="Log out" onPress={() => handleSignOut()} />
+    </DrawerContentScrollView>
+  );
+}
+
 const ChatStack = () => {
   return (
-    <Stack.Navigator defaultScreenOptions={Home}>
-      <Stack.Screen name="Home" component={Home} />
-      <Stack.Screen name="Chat" component={Chat} />
-      <Stack.Screen name="Profile" component={Profile} />
-    </Stack.Navigator>
+    <Drawer.Navigator
+      defaultScreenOptions={Home}
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+    >
+      <Drawer.Screen name="Home" component={Home} />
+      <Drawer.Screen name="Chat" component={Chat} />
+      <Drawer.Screen name="Profile" component={Profile} />
+    </Drawer.Navigator>
   );
 };
 
 const RootNavigator = () => {
   const [user, setUser] = useContext(AuthenticationUserContext);
-  const [loading, setLoading] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unSubcribe = onAuthStateChanged(auth, async (authenticationUser) => {
@@ -81,12 +107,3 @@ export default function App() {
     </AuthenticationProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

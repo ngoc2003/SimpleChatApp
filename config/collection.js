@@ -1,12 +1,4 @@
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  doc,
-  query,
-  where,
-  onSnapshot,
-} from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { database } from "./firebase";
 
 export const usersCollection = collection(database, "users");

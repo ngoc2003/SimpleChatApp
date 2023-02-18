@@ -6,7 +6,10 @@ const ConversationList = ({ conversationList = [] }) => {
   if (!conversationList.length) {
     return (
       <View>
-        <Text>Empty</Text>
+        <Text>
+          You havent had any conversation yet! Create your new conversation
+          please!!
+        </Text>
       </View>
     );
   }

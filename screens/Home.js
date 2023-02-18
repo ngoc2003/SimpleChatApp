@@ -7,18 +7,15 @@ import React, {
 import { View, TouchableOpacity, Image, StyleSheet, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import colors from "../colors";
-import { Entypo } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { Button, Modal, TextInput } from "react-native-paper";
 import {
   collection,
   addDoc,
   serverTimestamp,
-  doc,
   query,
   where,
   onSnapshot,
-  getDocs,
 } from "firebase/firestore";
 import { auth, database } from "../config/firebase";
 import { chatsCollection, usersCollection } from "../config/collection";
@@ -44,7 +41,6 @@ const Home = () => {
       headerTintColor: colors.primary,
     });
   }, [navigation]);
-
   const handleAddNewChat = () => {
     if (!emailToChat || emailToChat === auth.currentUser.email) {
       console.log("Create error!");
@@ -78,14 +74,13 @@ const Home = () => {
   const handleFetchList = useCallback(() => {
     const q = query(
       chatsCollection,
-      // where("receiver.receiverId", "==", auth.currentUser.uid)
       where("users", "array-contains", auth.currentUser.uid)
     );
     onSnapshot(q, (querySnapshot) => {
       setListConversation(
         querySnapshot.docs.map((doc) => ({
           conversationId: doc.id,
-          ...doc.data(),
+          ...doc?.data(),
           createdAt: doc.data().createdAt.toDate(),
         }))
       );
@@ -98,9 +93,6 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.item} onPress={handleShowModal}>
-        <AntDesign name="plus" size={24} color="white" />
-      </TouchableOpacity>
       <Modal
         visible={openModal}
         onDismiss={handleHide}
@@ -121,10 +113,12 @@ const Home = () => {
         </Button>
       </Modal>
       <TouchableOpacity
-        onPress={() => navigation.navigate("Chat")}
+        onPress={() => {
+          handleShowModal();
+        }}
         style={styles.chatButton}
       >
-        <Entypo name="chat" size={24} color={colors.lightGray} />
+        <AntDesign name="plus" size={24} color="white" />
       </TouchableOpacity>
       <ConversationList conversationList={listConversation} />
     </View>
