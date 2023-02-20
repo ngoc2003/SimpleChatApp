@@ -1,10 +1,5 @@
-import React, {
-  useEffect,
-  useState,
-  useLayoutEffect,
-  useCallback,
-} from "react";
-import { View, TouchableOpacity, Image, StyleSheet, Text } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import colors from "../colors";
 import { AntDesign } from "@expo/vector-icons";

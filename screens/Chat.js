@@ -1,4 +1,9 @@
-import React, { useState, useLayoutEffect, useCallback } from "react";
+import React, {
+  useState,
+  useLayoutEffect,
+  useCallback,
+  useEffect,
+} from "react";
 import { GiftedChat } from "react-native-gifted-chat";
 import {
   collection,
