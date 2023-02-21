@@ -8,10 +8,15 @@ import avatarDefault from "../../../assets/avatarDefault.jpeg";
 
 const ConversationItem = ({ users = [], conversationId }) => {
   const navigation = useNavigation();
-  const handleNavigate = () => {
-    navigation.navigate("Chat", { conversationId });
-  };
   const [userInformation, setUserInformation] = useState({});
+  const handleNavigate = () => {
+    navigation.navigate("Chat", {
+      conversationId,
+      displayName: userInformation.displayName,
+    });
+  };
+
+  console.log(userInformation);
 
   useEffect(() => {
     const index = users.findIndex((item) => item !== auth.currentUser.uid);

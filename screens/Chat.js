@@ -17,9 +17,13 @@ import { auth, database } from "../config/firebase";
 import { useNavigation } from "@react-navigation/native";
 import { messagesCollection } from "../config/collection";
 import avatarDefault from "../assets/avatarDefault.jpeg";
+import { Ionicons } from "@expo/vector-icons";
+import colors from "../colors";
+import { TouchableOpacity } from "react-native";
+import { View } from "react-native";
 
 export default function Chat({ route }) {
-  const { conversationId } = route.params;
+  const { conversationId, displayName } = route.params;
   const [messages, setMessages] = useState([]);
   const navigation = useNavigation();
 
@@ -44,6 +48,22 @@ export default function Chat({ route }) {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    navigation.setOptions({
+      title: displayName.toUpperCase() ?? "",
+      headerTitleAlign: "center",
+      headerTintColor: colors.primary,
+      headerLeft: () => (
+        <TouchableOpacity
+          style={{ marginHorizontal: 10 }}
+          onPress={() => navigation.navigate("Home")}
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.primary} />
+        </TouchableOpacity>
+      ),
+    });
+  }, []);
+
   const handleSend = useCallback((messages = []) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, messages)
@@ -59,26 +79,28 @@ export default function Chat({ route }) {
   }, []);
 
   return (
-    <GiftedChat
-      messages={messages}
-      showAvatarForEveryMessage={false}
-      showUserAvatar={false}
-      onSend={(messages) => handleSend(messages)}
-      messagesContainerStyle={{
-        backgroundColor: "#fff",
-      }}
-      textInputStyle={{
-        backgroundColor: "#fff",
-        borderRadius: 20,
-      }}
-      placeholder="Your message . . ."
-      onPressAvatar={(user) =>
-        navigation.navigate("Profile", { emailUser: user._id })
-      }
-      user={{
-        _id: auth?.currentUser?.email,
-        avatar: auth?.currentUser?.photoURL || avatarDefault,
-      }}
-    />
+    <View style={{ backgroundColor: "#000" }}>
+      <GiftedChat
+        messages={messages}
+        showAvatarForEveryMessage={false}
+        showUserAvatar={false}
+        onSend={(messages) => handleSend(messages)}
+        messagesContainerStyle={{
+          backgroundColor: "#fff",
+        }}
+        textInputStyle={{
+          backgroundColor: "#fff",
+          borderRadius: 20,
+        }}
+        placeholder="Your message . . ."
+        onPressAvatar={(user) =>
+          navigation.navigate("Profile", { emailUser: user._id })
+        }
+        user={{
+          _id: auth?.currentUser?.email,
+          avatar: auth?.currentUser?.photoURL || avatarDefault,
+        }}
+      />
+    </View>
   );
 }
