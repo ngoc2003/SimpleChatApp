@@ -25,17 +25,19 @@ import Chat from "./screens/Chat";
 import Login from "./screens/Login";
 import SignUp from "./screens/SignUp";
 import Home from "./screens/Home";
-import { auth } from "./config/firebase";
+import { auth, database } from "./config/firebase";
 import { signOut } from "firebase/auth";
 import Profile from "./screens/Profile";
 
 import colors from "./colors";
 import defaultAvatar from "./assets/avatarDefault.jpeg";
+import { doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { usersCollection } from "./config/collection";
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
-const AuthenticationUserContext = createContext({});
+export const AuthenticationUserContext = createContext();
 const AuthenticationProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   return (
@@ -60,8 +62,11 @@ const AuthStack = () => {
 };
 
 function CustomDrawerContent(props) {
+  const [user, setUser] = useContext(AuthenticationUserContext);
+
   const handleSignOut = () => {
     signOut(auth).catch((error) => console.log("Error logging out: ", error));
+    setUser(null);
   };
 
   return (
@@ -74,15 +79,19 @@ function CustomDrawerContent(props) {
             source={defaultAvatar}
           />
         </View>
-        <Text style={styles.headerSideBarText}>
-          {auth?.currentUser.displayName}
-        </Text>
-        <Text style={styles.headerSideBarText}>{auth.currentUser.email}</Text>
+        <Text style={styles.headerSideBarText}>{user.displayName || ""}</Text>
+        <Text style={styles.headerSideBarText}>{user.email || ""}</Text>
+        <TouchableOpacity
+          style={styles.yourProfile}
+          onPress={() => alert("Go to your peofile")}
+        >
+          <Text style={styles.yourProfile.text}>View Your Profile</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.signOutButton}
           onPress={() => handleSignOut()}
         >
-          <AntDesign name="logout" size={24} color={colors.primary} />
+          <AntDesign name="logout" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
       <Text
@@ -148,13 +157,23 @@ const RootNavigator = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unSubcribe = onAuthStateChanged(auth, async (authenticationUser) => {
-      authenticationUser ? setUser(authenticationUser) : setUser(null);
+    onAuthStateChanged(auth, async (authenticationUser) => {
+      if (authenticationUser) {
+        const uid = authenticationUser.uid;
+        const q = query(usersCollection, where("id", "==", uid));
+        onSnapshot(q, (snapshot) => {
+          if (snapshot.docs[0].data()) {
+            setUser(snapshot.docs[0].data());
+          } else {
+            setUser(null);
+          }
+        });
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
-
-    return () => unSubcribe();
-  }, [user]);
+  }, []);
 
   if (loading) {
     return (
@@ -163,6 +182,8 @@ const RootNavigator = () => {
       </View>
     );
   }
+
+  console.log("USER ~~", user);
 
   return (
     <NavigationContainer>
@@ -182,13 +203,15 @@ export default function App() {
 const styles = StyleSheet.create({
   headerSideBar: {
     position: "relative",
-    backgroundColor: colors.primary,
+    backgroundColor: "#fff",
     height: 300,
     justifyContent: "center",
     alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
   signOutButton: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.primary,
     padding: 5,
     borderRadius: 9999,
     position: "absolute",
@@ -196,13 +219,23 @@ const styles = StyleSheet.create({
     right: 15,
   },
   headerSideBarText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: "#333366",
+    fontWeight: "500",
     paddingVertical: 5,
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 9999,
+  },
+  yourProfile: {
+    text: {
+      color: "#fff",
+    },
+    backgroundColor: colors.primary,
+    marginVertical: 10,
+    color: "#fff",
+    padding: 8,
+    borderRadius: 20,
   },
 });

@@ -3,6 +3,8 @@ import React, {
   useLayoutEffect,
   useCallback,
   useEffect,
+  useContext,
+  createContext,
 } from "react";
 import { GiftedChat, Send } from "react-native-gifted-chat";
 import {
@@ -12,6 +14,9 @@ import {
   orderBy,
   query,
   onSnapshot,
+  setDoc,
+  doc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { auth, database } from "../config/firebase";
 import { useNavigation } from "@react-navigation/native";
@@ -22,6 +27,7 @@ import colors from "../colors";
 import { TouchableOpacity, ActivityIndicator } from "react-native";
 import { View, Text, StyleSheet } from "react-native";
 import { IconButton } from "react-native-paper";
+import { AuthenticationUserContext } from "../App";
 
 function renderSend(props) {
   return (
@@ -86,8 +92,26 @@ export default function Chat({ route }) {
     });
   }, [displayName]);
 
+  // // const user = "";
+  // const user = useContext(AuthenticationUserContext);
+  // // useContext(AuthenticationUserContext)
+  // console.log(user);
+
+  // const { onFetch } = useContext(AuthenticationUserContext);
+
+  // useEffect(() => {
+  //   onFetch();
+  // }, [user]);
+
   const handleSend = useCallback(
     (messages = []) => {
+      setDoc(
+        doc(database, "users", auth.currentUser.uid),
+        {
+          lastActive: serverTimestamp(),
+        },
+        { merge: true }
+      );
       setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, messages)
       );

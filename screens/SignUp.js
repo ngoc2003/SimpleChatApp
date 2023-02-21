@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 const backgroundImage = require("../assets/backImage.png");
 import { auth, database } from "../config/firebase";
 import colors from "../colors";
@@ -22,9 +22,8 @@ const SignUp = ({ navigation }) => {
 
   const handleSignUp = async () => {
     if (email && password && displayName) {
-      const newUser = createUserWithEmailAndPassword(auth, email, password)
+      createUserWithEmailAndPassword(auth, email, password)
         .then(({ user }) => {
-          updateProfile(user, { displayName });
           addDoc(collection(database, "users"), {
             id: user.uid,
             displayName,
@@ -33,10 +32,6 @@ const SignUp = ({ navigation }) => {
           console.log("Sign Up success");
         })
         .catch((err) => Alert.alert(err.message));
-
-      if (newUser.user) {
-        await updateCurrentUser(newUser.user, { displayName });
-      }
     }
   };
   return (

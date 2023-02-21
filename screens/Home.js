@@ -66,8 +66,6 @@ const Home = () => {
 
   const [listConversation, setListConversation] = useState();
 
-  console.log(listConversation);
-
   const handleFetchList = useCallback(() => {
     const q = query(
       chatsCollection,
