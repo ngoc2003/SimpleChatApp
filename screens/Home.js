@@ -66,6 +66,8 @@ const Home = () => {
 
   const [listConversation, setListConversation] = useState();
 
+  console.log(listConversation);
+
   const handleFetchList = useCallback(() => {
     const q = query(
       chatsCollection,
@@ -73,11 +75,13 @@ const Home = () => {
     );
     onSnapshot(q, (querySnapshot) => {
       setListConversation(
-        querySnapshot.docs.map((doc) => ({
-          conversationId: doc.id,
-          ...doc?.data(),
-          createdAt: doc.data().createdAt.toDate(),
-        }))
+        querySnapshot.docs.map((doc) => {
+          return {
+            conversationId: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt,
+          };
+        })
       );
     });
   }, []);

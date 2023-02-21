@@ -16,8 +16,6 @@ const ConversationItem = ({ users = [], conversationId }) => {
     });
   };
 
-  console.log(userInformation);
-
   useEffect(() => {
     const index = users.findIndex((item) => item !== auth.currentUser.uid);
     const q = query(usersCollection, where("id", "==", users[index]));

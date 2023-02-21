@@ -4,7 +4,7 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-import { GiftedChat } from "react-native-gifted-chat";
+import { GiftedChat, Send } from "react-native-gifted-chat";
 import {
   collection,
   addDoc,
@@ -19,13 +19,33 @@ import { messagesCollection } from "../config/collection";
 import avatarDefault from "../assets/avatarDefault.jpeg";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "../colors";
-import { TouchableOpacity } from "react-native";
-import { View } from "react-native";
+import { TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { IconButton } from "react-native-paper";
+
+function renderSend(props) {
+  return (
+    <Send {...props}>
+      <View style={styles.sendingContainer}>
+        <IconButton icon="send-circle" size={32} color={colors.primary} />
+      </View>
+    </Send>
+  );
+}
+
+function renderLoading() {
+  return (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color="#6646ee" />
+    </View>
+  );
+}
 
 export default function Chat({ route }) {
   const { conversationId, displayName } = route.params;
   const [messages, setMessages] = useState([]);
   const navigation = useNavigation();
+  const [loading, setIsLoading] = useState(true);
 
   useLayoutEffect(() => {
     const q = query(
@@ -35,6 +55,7 @@ export default function Chat({ route }) {
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      setIsLoading(false);
       setMessages(
         querySnapshot.docs.map((doc) => ({
           _id: doc.data()._id,
@@ -45,8 +66,9 @@ export default function Chat({ route }) {
         }))
       );
     });
+
     return unsubscribe;
-  }, []);
+  }, [conversationId, displayName, messages]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -62,24 +84,27 @@ export default function Chat({ route }) {
         </TouchableOpacity>
       ),
     });
-  }, []);
+  }, [displayName]);
 
-  const handleSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-    const { _id, createdAt, text, user } = messages[0];
-    addDoc(collection(database, "messages"), {
-      _id,
-      conversationId,
-      createdAt,
-      text,
-      user,
-    });
-  }, []);
+  const handleSend = useCallback(
+    (messages = []) => {
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, messages)
+      );
+      const { _id, createdAt, text, user } = messages[0];
+      addDoc(collection(database, "messages"), {
+        _id,
+        conversationId,
+        createdAt,
+        text,
+        user,
+      });
+    },
+    [conversationId]
+  );
 
   return (
-    <View style={{ backgroundColor: "#000" }}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <GiftedChat
         messages={messages}
         showAvatarForEveryMessage={false}
@@ -92,15 +117,36 @@ export default function Chat({ route }) {
           backgroundColor: "#fff",
           borderRadius: 20,
         }}
+        listViewProps={{
+          contentContainerStyle: { flexGrow: 1 },
+        }}
         placeholder="Your message . . ."
         onPressAvatar={(user) =>
           navigation.navigate("Profile", { emailUser: user._id })
         }
+        renderQuickReplySend={() => {
+          return <Text>Xin chao</Text>;
+        }}
         user={{
           _id: auth?.currentUser?.email,
           avatar: auth?.currentUser?.photoURL || avatarDefault,
         }}
+        renderLoading={renderLoading}
+        renderSend={renderSend}
+        alwaysShowSend
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  sendingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
