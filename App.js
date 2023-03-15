@@ -33,6 +33,7 @@ import colors from "./colors";
 import defaultAvatar from "./assets/avatarDefault.jpeg";
 import { doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
 import { usersCollection } from "./config/collection";
+import FirstStart from "./screens/FirstStart";
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -59,6 +60,24 @@ const AuthStack = () => {
       <Stack.Screen name="SignUp" component={SignUp} />
     </Stack.Navigator>
   );
+};
+
+const horizontalAnimation = {
+  gestureDirection: "horizontal",
+  cardStyleInterpolator: ({ current, layouts }) => {
+    return {
+      cardStyle: {
+        transform: [
+          {
+            translateX: current.progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [layouts.screen.width, 0],
+            }),
+          },
+        ],
+      },
+    };
+  },
 };
 
 function CustomDrawerContent(props) {
@@ -113,12 +132,15 @@ function CustomDrawerContent(props) {
 const ChatStack = () => {
   return (
     <Drawer.Navigator
-      defaultScreenOptions={Home}
+      mode="modal"
+      initialRouteName="FirstStart"
+      // defaultScreenOptions={FirstStart}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         drawerActiveBackgroundColor: colors.primary,
         drawerContentStyle: "#fff",
         drawerActiveTintColor: "#fff",
+        horizontalAnimation,
       }}
     >
       <Drawer.Screen
@@ -147,6 +169,11 @@ const ChatStack = () => {
         options={{
           drawerItemStyle: { display: "none" },
         }}
+      />
+      <Drawer.Screen
+        name="FirstStart"
+        component={FirstStart}
+        // options={{ drawerItemStyle: { display: "none" } }}
       />
     </Drawer.Navigator>
   );
@@ -181,15 +208,13 @@ const RootNavigator = () => {
         <ActivityIndicator size="large" />
       </View>
     );
+  } else {
+    return (
+      <NavigationContainer>
+        {user ? <ChatStack /> : <AuthStack />}
+      </NavigationContainer>
+    );
   }
-
-  console.log("USER ~~", user);
-
-  return (
-    <NavigationContainer>
-      {user ? <ChatStack /> : <AuthStack />}
-    </NavigationContainer>
-  );
 };
 
 export default function App() {

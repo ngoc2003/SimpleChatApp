@@ -92,17 +92,6 @@ export default function Chat({ route }) {
     });
   }, [displayName]);
 
-  // // const user = "";
-  // const user = useContext(AuthenticationUserContext);
-  // // useContext(AuthenticationUserContext)
-  // console.log(user);
-
-  // const { onFetch } = useContext(AuthenticationUserContext);
-
-  // useEffect(() => {
-  //   onFetch();
-  // }, [user]);
-
   const handleSend = useCallback(
     (messages = []) => {
       setDoc(

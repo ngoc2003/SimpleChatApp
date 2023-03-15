@@ -26,6 +26,7 @@ const Login = ({ navigation }) => {
         .catch((err) => Alert.alert(err.message));
     }
   };
+  
   return (
     <View style={styles.container}>
       <Image source={backgroundImage} style={styles.backImage} />
